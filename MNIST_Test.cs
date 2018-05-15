@@ -80,9 +80,11 @@ namespace MainTest
             // Get the elapsed time as a TimeSpan value.
             TimeSpan ts = stopWatch.Elapsed;
             Console.WriteLine("Reading files takes: " + ts.Seconds.ToString() + " seconds");
+
+            // T-SNE starts
             stopWatch.Restart();
             var Y = new TSNE(m, 2, 2, 30.0)._TSNE();
-            //var Y = X2P(data);
+            
             stopWatch.Stop();
             ts = stopWatch.Elapsed;
             string elapsedTime = String.Format("{0:00}:{1:00}:{2:00}.{3:00}",
@@ -90,6 +92,10 @@ namespace MainTest
             ts.Milliseconds / 10);
             Console.WriteLine("RunTime " + elapsedTime);
 
+
+            // add label to Y
+            Y = Y.Concatenate(labels);
+           
             // write result to target path
             string targetPath = @"C:\Users\v-jiehu\source\repos\T-SNE\T-SNE\data";
             string fileName = "result.txt";
