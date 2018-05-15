@@ -16,23 +16,23 @@ namespace MainTest
             stopWatch.Start();
 
 
-            String input_X = File.ReadAllText(@"C:\Users\v-jiehu\source\repos\T-SNE\T-SNE\data\mnist2500_X.txt");
-            String input_labels = File.ReadAllText(@"C:\Users\v-jiehu\source\repos\T-SNE\T-SNE\data\mnist2500_labels.txt");
-            var lines_X = input_X.Trim().Split('\n');
-            var line1_X = lines_X[0].Split(new string[] { "   " }, StringSplitOptions.None);
+            String[] lines_X = File.ReadAllLines(@"C:\Users\v-jiehu\source\repos\T-SNE\T-SNE\data\mnist2500_X.txt");
+            String[] lines_Y = File.ReadAllLines(@"C:\Users\v-jiehu\source\repos\T-SNE\T-SNE\data\mnist2500_labels.txt");
+            // var lines_X = input_X.Trim().Split('\n');
+            // var line1_X = lines_X[0].Split(new string[] { "   " }, StringSplitOptions.None);
 
-            var m = Matrix.Create(lines_X.GetLength(0), line1_X.GetLength(0), 0.0);
+            var m = Matrix.Create(lines_X.GetLength(0), lines_X[0].Split().GetLength(0), 0.0);
             var r = 0;
             var c = 0;
-            
-            foreach(var line in lines_X)
+
+            foreach (var line in lines_X)
             {
-                
+
                 foreach (var w in line.Trim().Split(new string[] { "   " }, StringSplitOptions.None))
                 {
                     try
                     {
-                        m[r,c] = Convert.ToDouble(w);
+                        m[r, c] = Convert.ToDouble(w);
                     }
                     catch (FormatException)
                     {
@@ -51,13 +51,13 @@ namespace MainTest
                 c = 0;
             }
 
-            var lines_Y = input_labels.Trim().Split('\n');
+            //var lines_Y = input_labels.Trim().Split('\n');
             var labels = Vector.Create(lines_Y.GetLength(0), 0.0);
             c = 0;
 
             foreach (var w in lines_Y)
             {
-                
+
                 try
                 {
                     labels[c] = Convert.ToDouble(w);
@@ -72,14 +72,14 @@ namespace MainTest
                 }
 
                 c++;
-                
+
             }
 
 
             stopWatch.Stop();
             // Get the elapsed time as a TimeSpan value.
             TimeSpan ts = stopWatch.Elapsed;
-            Console.WriteLine("Reading files takes: " + ts.Seconds.ToString()+" seconds");
+            Console.WriteLine("Reading files takes: " + ts.Seconds.ToString() + " seconds");
             stopWatch.Restart();
             var Y = new TSNE(m, 2, 2, 30.0)._TSNE();
             //var Y = X2P(data);
@@ -90,7 +90,44 @@ namespace MainTest
             ts.Milliseconds / 10);
             Console.WriteLine("RunTime " + elapsedTime);
 
+            // write result to target path
+            string targetPath = @"C:\Users\v-jiehu\source\repos\T-SNE\T-SNE\data";
+            string fileName = "result.txt";
 
+            string destFile = System.IO.Path.Combine(targetPath, fileName);
+            if (System.IO.File.Exists(destFile))
+            {
+                // Use a try block to catch IOExceptions, to
+                // handle the case of the file already being
+                // opened by another process.
+                try
+                {
+                    System.IO.File.Delete(destFile);
+                }
+                catch (System.IO.IOException e)
+                {
+                    Console.WriteLine(e.Message);
+                }
+            }
+
+            if (!System.IO.File.Exists(targetPath))
+            {
+                System.IO.Directory.CreateDirectory(targetPath);
+            }
+
+            
+            using (System.IO.StreamWriter file =
+            new System.IO.StreamWriter(destFile))
+            {
+
+                for (var row=0;row< Y.GetLength(0);row++)
+                {
+
+                    var string_line = string.Join("\t", Y.GetRow(row));
+                    file.WriteLine(string_line);
+                }
+
+            }
 
 
         }
